@@ -1,11 +1,13 @@
 import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:clothes_image_classification/model/chosen_picture.dart';
-import 'package:clothes_image_classification/utils/image_preprocessing.dart';
 import 'package:clothes_image_classification/utils/app_colors.dart';
 import 'package:clothes_image_classification/utils/app_images.dart';
 import 'package:clothes_image_classification/utils/app_styles.dart';
+import 'package:clothes_image_classification/utils/image_preprocessing.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -98,18 +100,36 @@ class _UploadPicState extends State<UploadPic> {
                       ],
                     ),
                   )
-                : Container(
-                    width: double.infinity,
-                    height: size.height * 0.35,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Image.file(
-                      File(
-                        imageFile == null ? _imagePath!.path : imageFile!.path,
+                : Stack(
+                    alignment: AlignmentGeometry.topRight,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: size.height * 0.35,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Image.file(
+                          File(
+                            imageFile == null
+                                ? _imagePath!.path
+                                : imageFile!.path,
+                          ),
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                      fit: BoxFit.contain,
-                    ),
+                      IconButton(
+                        onPressed: (){
+                          imageFile = null;
+                          _imagePath = null;
+                          ChosenPicture.clear();
+                          setState(() {
+
+                          });
+                        },
+                        icon: Icon(Icons.cancel, color: Colors.red,size: 30,),
+                      ),
+                    ],
                   ),
             SizedBox(height: 38),
             // upload from gallery
@@ -156,7 +176,7 @@ class _UploadPicState extends State<UploadPic> {
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
+      // type: FileType.image,
       allowMultiple: false,
     );
     if (result != null) {
@@ -167,7 +187,6 @@ class _UploadPicState extends State<UploadPic> {
     }
     print(imageFile);
   }
-
   Future<void> openCam() async {
     final cameras = await availableCameras();
 
@@ -186,7 +205,6 @@ class _UploadPicState extends State<UploadPic> {
       });
     }
   }
-
   Future<void> submit() async {
     final scaffold = ScaffoldMessenger.of(context);
 
@@ -203,31 +221,66 @@ class _UploadPicState extends State<UploadPic> {
         ),
       );
 
-      // Process image directly
-      await ImagePreprocessing.imagePreprocessing(
-        imageFile: imageFile ?? File(_imagePath!.path),
+      // Get the actual file
+      final File imageToProcess = imageFile ?? File(_imagePath!.path);
+      print('📸 Processing image: ${imageToProcess.path}');
+
+      // Process image and get Float32List tensor directly
+      final Float32List processedTensor =
+          await ImagePreprocessing.processImageForModel(imageToProcess);
+
+      // Also ensure ChosenPicture is updated
+      print(
+        '✅ Preprocessing complete, tensor length: ${processedTensor.length}',
       );
 
       // Run prediction
       final handler = ModelHandler();
       await handler.loadModel();
-      final predictions = await handler.predictFromProcessedImage(ChosenPicture.finalResult!);
+      final predictions = await handler.predict(processedTensor);
 
       scaffold.hideCurrentSnackBar();
 
-      // Show results
-      print('Predictions: $predictions');
-
+      // Show results - navigate to results page or show dialog
+      _showResultsDialog(predictions);
     } catch (e) {
+      print('❌ Submit error: $e');
       scaffold.hideCurrentSnackBar();
       scaffold.showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     }
   }
-
-
+  void _showResultsDialog(List<Map<String, dynamic>> predictions) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Classification Results'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: predictions.length,
+            itemBuilder: (context, index) {
+              final pred = predictions[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: index == 0 ? Colors.green : Colors.grey,
+                  child: Text('${index + 1}',style: TextStyle(color: AppColors.white),),
+                ),
+                title: Text(pred['label']),
+                trailing: Text(pred['percentage'],style: TextStyle(fontWeight: FontWeight.bold),),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 }
