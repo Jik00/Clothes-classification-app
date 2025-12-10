@@ -2,11 +2,13 @@ import 'package:camera/camera.dart';
 import 'package:clothes_image_classification/ui/upload_pic.dart';
 import 'package:clothes_image_classification/utils/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final cameras = await availableCameras();
   final firstCamera = cameras.first;
+  final interpreter = await Interpreter.fromAsset('assets/models/fashion_mnist.tflite');
 
   runApp(
       MyApp(cameraDescription:firstCamera ,)
