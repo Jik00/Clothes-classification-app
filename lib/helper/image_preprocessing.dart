@@ -4,8 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 
 class ImagePreprocessing {
+
+  static Future<void> imagePreprocessing({required File imageFile})async {
+    await convertFileToImage(imageFile: imageFile);
+    imageResize(image: ChosenPicture.image!);
+    grayScale(image: ChosenPicture.image!);
+    invertToBlackBg(image: ChosenPicture.grayScaleImage!);
+  normalizeByDividingBy255(image: ChosenPicture.invertedImage!);
+  }
   // convert file to image
-  Future<void> convertFileToImage({required File imageFile}) async {
+  static Future<void> convertFileToImage({required File imageFile}) async {
     // Read file directly as bytes
     List<int> imageBytes = await imageFile.readAsBytes();
     // Decode
@@ -17,19 +25,18 @@ class ImagePreprocessing {
 
     ChosenPicture.image = image;
   }
-
   // image resize
-  void imageResize({required img.Image image}) {
+  static void imageResize({required img.Image image}) {
     image = img.copyResize(image, width: 28, height: 28);
     ChosenPicture.image = image;
   }
   // grayscale due to the data requirments
-  void grayScale({required img.Image image}) {
+  static void grayScale({required img.Image image}) {
     image = img.grayscale(image);
     ChosenPicture.grayScaleImage = image;
   }
   // Invert if white background cuz the data has white on black data in it
-  void InvertoBlackBg({required img.Image image}) {
+  static void invertToBlackBg({required img.Image image}) {
     final bytes = image.getBytes();
     if (calculateMean(image: image) > 127) {
       for (int i = 0; i < bytes.length; i++) {
@@ -39,7 +46,7 @@ class ImagePreprocessing {
     ChosenPicture.invertedImage = bytes;
   }
 // calculate mean to decide wheather to invert or not
-  double calculateMean({required img.Image image}) {
+  static double calculateMean({required img.Image image}) {
     final bytes = image.getBytes();
     double mean = 0;
     for (int i = 0; i < bytes.length; i++) {
@@ -48,7 +55,7 @@ class ImagePreprocessing {
     return mean / bytes.length;
   }
   //normalize image
-  void normalizeByDividingBy255({required img.Image image}) {
+  static void normalizeByDividingBy255({required var image}) {
     final height = image.height;
     final width = image.width;
     final bytes = image.getBytes();
@@ -60,6 +67,6 @@ class ImagePreprocessing {
         index++;
       }
     }
-    ChosenPicture.normalizedImage = result;
+    ChosenPicture.finalResult = result;
   }
 }
