@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:clothes_image_classification/helper/image_preprocessing.dart';
 import 'package:clothes_image_classification/model/chosen_picture.dart';
 import 'package:clothes_image_classification/utils/app_colors.dart';
 import 'package:clothes_image_classification/utils/app_images.dart';
@@ -189,8 +190,13 @@ class _UploadPicState extends State<UploadPic> {
     }
   }
 
-  void submit() async{
-    ChosenPicture.image = await convertFileToImage(imageFile: imageFile ?? File(_imagePath!.path));
+  Future<void> submit() async{
+    // ChosenPicture.image = await convertFileToImage(imageFile: imageFile ?? File(_imagePath!.path));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: CircularProgressIndicator(color: AppColors.primary,))
+    );
+    await ImagePreprocessing.imagePreprocessing(imageFile: imageFile ?? File(_imagePath!.path));
+      SnackBar(content:Text("done?"));
   }
 
   Future<img.Image> convertFileToImage({required File imageFile}) async {

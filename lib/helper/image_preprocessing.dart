@@ -6,11 +6,17 @@ import 'package:image/image.dart' as img;
 class ImagePreprocessing {
 
   static Future<void> imagePreprocessing({required File imageFile})async {
+    print('1');
     await convertFileToImage(imageFile: imageFile);
+    print('12');
     imageResize(image: ChosenPicture.image!);
+    print('13');
     grayScale(image: ChosenPicture.image!);
+    print('14');
     invertToBlackBg(image: ChosenPicture.grayScaleImage!);
+    print('15');
   normalizeByDividingBy255(image: ChosenPicture.invertedImage!);
+    print('khlst');
   }
   // convert file to image
   static Future<void> convertFileToImage({required File imageFile}) async {
