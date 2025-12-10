@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:clothes_image_classification/helper/image_preprocessing.dart';
+import 'package:clothes_image_classification/model/chosen_picture.dart';
+import 'package:clothes_image_classification/utils/image_preprocessing.dart';
 import 'package:clothes_image_classification/utils/app_colors.dart';
 import 'package:clothes_image_classification/utils/app_images.dart';
 import 'package:clothes_image_classification/utils/app_styles.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as img;
 
+import '../services/model_handler.dart';
 import '../utils/widgets/custom_elevated_button.dart';
 import 'camera_preview_screen.dart';
 
@@ -187,25 +187,46 @@ class _UploadPicState extends State<UploadPic> {
     }
   }
 
-  Future<void> submit() async{
-    // ChosenPicture.image = await convertFileToImage(imageFile: imageFile ?? File(_imagePath!.path));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: CircularProgressIndicator(color: AppColors.primary,))
-    );
-    await ImagePreprocessing.imagePreprocessing(imageFile: imageFile ?? File(_imagePath!.path));
-      SnackBar(content:Text("done?"));
-  }
+  Future<void> submit() async {
+    final scaffold = ScaffoldMessenger.of(context);
 
-  Future<img.Image> convertFileToImage({required File imageFile}) async {
-    // Read file directly as bytes
-    List<int> imageBytes = await imageFile.readAsBytes();
-    // Decode
-    img.Image? image = img.decodeImage(Uint8List.fromList(imageBytes));
+    try {
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Processing...'),
+            ],
+          ),
+        ),
+      );
 
-    if (image == null) {
-      throw Exception('Failed to decode image');
+      // Process image directly
+      await ImagePreprocessing.imagePreprocessing(
+        imageFile: imageFile ?? File(_imagePath!.path),
+      );
+
+      // Run prediction
+      final handler = ModelHandler();
+      await handler.loadModel();
+      final predictions = await handler.predictFromProcessedImage(ChosenPicture.finalResult!);
+
+      scaffold.hideCurrentSnackBar();
+
+      // Show results
+      print('Predictions: $predictions');
+
+    } catch (e) {
+      scaffold.hideCurrentSnackBar();
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-    return image;
   }
 
 
