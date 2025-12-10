@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:clothes_image_classification/helper/image_preprocessing.dart';
-import 'package:clothes_image_classification/model/chosen_picture.dart';
 import 'package:clothes_image_classification/utils/app_colors.dart';
 import 'package:clothes_image_classification/utils/app_images.dart';
 import 'package:clothes_image_classification/utils/app_styles.dart';
@@ -25,7 +24,6 @@ class UploadPic extends StatefulWidget {
 
 class _UploadPicState extends State<UploadPic> {
   late CameraController _cameraController;
-  late Future<void> _initializeControllerFuture;
   PlatformFile? file;
   XFile? _imagePath;
   File? imageFile;
@@ -35,7 +33,6 @@ class _UploadPicState extends State<UploadPic> {
     // TODO: implement initState
     super.initState();
     _cameraController = CameraController(widget.camera, ResolutionPreset.high);
-    _initializeControllerFuture = _cameraController.initialize();
   }
 
   @override
