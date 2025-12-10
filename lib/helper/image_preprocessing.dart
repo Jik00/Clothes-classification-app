@@ -73,8 +73,8 @@ class ImagePreprocessing {
     final bytes = image.getBytes();
     final result = List.generate(28, (_) => List<double>.filled(28, 0.0));
     int index = 0;
-    for (int i = 0; i < 28; i++) {
-      for (int j = 0; j < 28; j++) {
+    for (int i = 0; i < height; i++) {
+      for (int j = 0; j < width; j++) {
         result[i][j] = bytes[index] / 255;
         index++;
       }
