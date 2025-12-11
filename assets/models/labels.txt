@@ -1,0 +1,10 @@
+T-shirt/top
+Trouser
+Pullover
+Dress
+Coat
+Sandle
+Shirt
+Sneaker
+Bag
+Ankle boot
