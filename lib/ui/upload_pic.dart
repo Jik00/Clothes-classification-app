@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
@@ -119,15 +118,13 @@ class _UploadPicState extends State<UploadPic> {
                         ),
                       ),
                       IconButton(
-                        onPressed: (){
+                        onPressed: () {
                           imageFile = null;
                           _imagePath = null;
                           ChosenPicture.clear();
-                          setState(() {
-
-                          });
+                          setState(() {});
                         },
-                        icon: Icon(Icons.cancel, color: Colors.red,size: 30,),
+                        icon: Icon(Icons.cancel, color: Colors.red, size: 30),
                       ),
                     ],
                   ),
@@ -173,7 +170,6 @@ class _UploadPicState extends State<UploadPic> {
       ),
     );
   }
-
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       // type: FileType.image,
@@ -185,7 +181,6 @@ class _UploadPicState extends State<UploadPic> {
       _imagePath = null;
       setState(() {});
     }
-    print(imageFile);
   }
   Future<void> openCam() async {
     final cameras = await availableCameras();
@@ -213,38 +208,26 @@ class _UploadPicState extends State<UploadPic> {
         SnackBar(
           content: Row(
             children: [
-              CircularProgressIndicator(),
+              CircularProgressIndicator(color: AppColors.primary),
               SizedBox(width: 16),
               Text('Processing...'),
             ],
           ),
         ),
       );
-
-      // Get the actual file
-      final File imageToProcess = imageFile ?? File(_imagePath!.path);
-      print('📸 Processing image: ${imageToProcess.path}');
-
       // Process image and get Float32List tensor directly
       final Float32List processedTensor =
-          await ImagePreprocessing.processImageForModel(imageToProcess);
-
-      // Also ensure ChosenPicture is updated
-      print(
-        '✅ Preprocessing complete, tensor length: ${processedTensor.length}',
-      );
-
-      // Run prediction
+          await ImagePreprocessing.processImageForModel(imageFile ?? File(_imagePath!.path));
+      // predict
       final handler = ModelHandler();
       await handler.loadModel();
       final predictions = await handler.predict(processedTensor);
 
       scaffold.hideCurrentSnackBar();
 
-      // Show results - navigate to results page or show dialog
+      // show results
       _showResultsDialog(predictions);
     } catch (e) {
-      print('❌ Submit error: $e');
       scaffold.hideCurrentSnackBar();
       scaffold.showSnackBar(
         SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
@@ -266,10 +249,16 @@ class _UploadPicState extends State<UploadPic> {
               return ListTile(
                 leading: CircleAvatar(
                   backgroundColor: index == 0 ? Colors.green : Colors.grey,
-                  child: Text('${index + 1}',style: TextStyle(color: AppColors.white),),
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(color: AppColors.white),
+                  ),
                 ),
                 title: Text(pred['label']),
-                trailing: Text(pred['percentage'],style: TextStyle(fontWeight: FontWeight.bold),),
+                trailing: Text(
+                  pred['percentage'],
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               );
             },
           ),
