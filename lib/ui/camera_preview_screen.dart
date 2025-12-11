@@ -45,7 +45,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
 
   void _switchCamera() {
     final newCamera = widget.cameras.firstWhere(
-          (cam) => cam.lensDirection != cameraController.description.lensDirection,
+      (cam) => cam.lensDirection != cameraController.description.lensDirection,
     );
 
     _initializeCamera(newCamera);
@@ -57,13 +57,20 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
       extendBody: true,
       extendBodyBehindAppBar: true,
       backgroundColor: AppColors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        leading: BackButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          color: AppColors.white,
+        ),
+      ),
       body: FutureBuilder(
         future: initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return SizedBox.expand(
-              child: CameraPreview(cameraController),
-            );
+            return SizedBox.expand(child: CameraPreview(cameraController));
           }
           return const Center(child: CircularProgressIndicator());
         },

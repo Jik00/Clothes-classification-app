@@ -1,11 +1,16 @@
 import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:camera/camera.dart';
-// import 'package:clothes_image_classification/helper/image_preprocessing.dart';
+import 'package:clothes_image_classification/model/chosen_picture.dart';
 import 'package:clothes_image_classification/utils/app_colors.dart';
 import 'package:clothes_image_classification/utils/app_images.dart';
 import 'package:clothes_image_classification/utils/app_styles.dart';
+import 'package:clothes_image_classification/utils/image_preprocessing.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
+import '../services/model_handler.dart';
 import '../utils/widgets/custom_elevated_button.dart';
 import 'camera_preview_screen.dart';
 
@@ -94,18 +99,34 @@ class _UploadPicState extends State<UploadPic> {
                       ],
                     ),
                   )
-                : Container(
-                    width: double.infinity,
-                    height: size.height * 0.35,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Image.file(
-                      File(
-                        imageFile == null ? _imagePath!.path : imageFile!.path,
+                : Stack(
+                    alignment: AlignmentGeometry.topRight,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: size.height * 0.35,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Image.file(
+                          File(
+                            imageFile == null
+                                ? _imagePath!.path
+                                : imageFile!.path,
+                          ),
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                      fit: BoxFit.contain,
-                    ),
+                      IconButton(
+                        onPressed: () {
+                          imageFile = null;
+                          _imagePath = null;
+                          ChosenPicture.clear();
+                          setState(() {});
+                        },
+                        icon: Icon(Icons.cancel, color: Colors.red, size: 30),
+                      ),
+                    ],
                   ),
             SizedBox(height: 38),
             // upload from gallery
@@ -149,10 +170,9 @@ class _UploadPicState extends State<UploadPic> {
       ),
     );
   }
-
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
+      // type: FileType.image,
       allowMultiple: false,
     );
     if (result != null) {
@@ -161,9 +181,7 @@ class _UploadPicState extends State<UploadPic> {
       _imagePath = null;
       setState(() {});
     }
-    print(imageFile);
   }
-
   Future<void> openCam() async {
     final cameras = await availableCameras();
 
@@ -182,15 +200,76 @@ class _UploadPicState extends State<UploadPic> {
       });
     }
   }
+  Future<void> submit() async {
+    final scaffold = ScaffoldMessenger.of(context);
 
-  Future<void> submit() async{
-    // ChosenPicture.image = await convertFileToImage(imageFile: imageFile ?? File(_imagePath!.path));
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text('Processing...',style: AppStyles.white20bold_poppins,),shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),backgroundColor: AppColors.primary,persist: true,)
-    // );
-    // await ImagePreprocessing.imagePreprocessing(imageFile: imageFile ?? File(_imagePath!.path));
-    // ScaffoldMessenger.of(context).clearSnackBars();
+    try {
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              CircularProgressIndicator(color: AppColors.primary),
+              SizedBox(width: 16),
+              Text('Processing...'),
+            ],
+          ),
+        ),
+      );
+      // Process image and get Float32List tensor directly
+      final Float32List processedTensor =
+          await ImagePreprocessing.processImageForModel(imageFile ?? File(_imagePath!.path));
+      // predict
+      final handler = ModelHandler();
+      await handler.loadModel();
+      final predictions = await handler.predict(processedTensor);
+
+      scaffold.hideCurrentSnackBar();
+
+      // show results
+      _showResultsDialog(predictions);
+    } catch (e) {
+      scaffold.hideCurrentSnackBar();
+      scaffold.showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    }
   }
-
-
+  void _showResultsDialog(List<Map<String, dynamic>> predictions) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Classification Results'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: predictions.length,
+            itemBuilder: (context, index) {
+              final pred = predictions[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: index == 0 ? Colors.green : Colors.grey,
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(color: AppColors.white),
+                  ),
+                ),
+                title: Text(pred['label']),
+                trailing: Text(
+                  pred['percentage'],
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 }
