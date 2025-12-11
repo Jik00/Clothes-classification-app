@@ -1,14 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:math';
 import 'package:image/image.dart' as img;
 import 'package:clothes_image_classification/model/chosen_picture.dart';
 
 class ImagePreprocessing {
   /// Complete pipeline that stores each step in ChosenPicture
   static Future<Float32List> processImageForModel(File imageFile) async {
-    print('=== COMPLETE PREPROCESSING PIPELINE ===');
-
     try {
       // Clear previous data
       ChosenPicture.clear();
@@ -17,7 +14,6 @@ class ImagePreprocessing {
       return ChosenPicture.processedTensor!;
 
     } catch (e) {
-      print('❌ Preprocessing error: $e');
       ChosenPicture.clear();
       rethrow;
     }
@@ -55,12 +51,10 @@ class ImagePreprocessing {
     if (ChosenPicture.originalImage == null) {
       throw Exception('Failed to decode image');
     }
-    print('1. ✅ Loaded: ${ChosenPicture.originalImage!.width}x${ChosenPicture.originalImage!.height}');
   }
   // Step 2: Convert to grayscale
   static void _convertToGrayscale() {
     ChosenPicture.grayScaleImage = img.grayscale(img.Image.from(ChosenPicture.originalImage!));
-    print('2. ✅ Grayscale: ${ChosenPicture.grayScaleImage!.numChannels} channels');
   }
   // Step 3: Resize to 28x28 (Fashion MNIST size)
   static void _resizeTo28x28() {
@@ -70,7 +64,6 @@ class ImagePreprocessing {
       height: 28,
       interpolation: img.Interpolation.nearest,
     );
-    print('3. ✅ Resized: 28x28');
   }
   // Step 4: Extract pixel data as Float32List (0-255 values)
   static Float32List _extractPixelData() {
@@ -100,7 +93,6 @@ class ImagePreprocessing {
     final processedPixels = Float32List.fromList(pixels);
 
     if (mean > 127) {
-      print('5. 🔄 Inverting (white background → black)');
       for (int i = 0; i < processedPixels.length; i++) {
         processedPixels[i] = 255 - processedPixels[i];
       }
