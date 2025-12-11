@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:clothes_image_classification/helper/image_preprocessing.dart';
+// import 'package:clothes_image_classification/helper/image_preprocessing.dart';
 import 'package:clothes_image_classification/utils/app_colors.dart';
 import 'package:clothes_image_classification/utils/app_images.dart';
 import 'package:clothes_image_classification/utils/app_styles.dart';
@@ -185,24 +185,12 @@ class _UploadPicState extends State<UploadPic> {
 
   Future<void> submit() async{
     // ChosenPicture.image = await convertFileToImage(imageFile: imageFile ?? File(_imagePath!.path));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Processing...',style: AppStyles.white20bold_poppins,),shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),backgroundColor: AppColors.primary,persist: true,)
-    );
-    await ImagePreprocessing.imagePreprocessing(imageFile: imageFile ?? File(_imagePath!.path));
-    ScaffoldMessenger.of(context).clearSnackBars();
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text('Processing...',style: AppStyles.white20bold_poppins,),shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),backgroundColor: AppColors.primary,persist: true,)
+    // );
+    // await ImagePreprocessing.imagePreprocessing(imageFile: imageFile ?? File(_imagePath!.path));
+    // ScaffoldMessenger.of(context).clearSnackBars();
   }
-
-  // Future<img.Image> convertFileToImage({required File imageFile}) async {
-  //   // Read file directly as bytes
-  //   List<int> imageBytes = await imageFile.readAsBytes();
-  //   // Decode
-  //   img.Image? image = img.decodeImage(Uint8List.fromList(imageBytes));
-  //
-  //   if (image == null) {
-  //     throw Exception('Failed to decode image');
-  //   }
-  //   return image;
-  // }
 
 
 }
