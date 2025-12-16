@@ -30,7 +30,7 @@ class CustomElevatedButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           side: BorderSide(color: borderColor?? Colors.transparent),
         ),
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         elevation: 0,
         splashFactory: NoSplash.splashFactory,
         shadowColor: Colors.transparent,

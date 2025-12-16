@@ -22,6 +22,7 @@ class UploadPic extends StatefulWidget {
   @override
   State<UploadPic> createState() => _UploadPicState();
 }
+
 class _UploadPicState extends State<UploadPic> {
   late CameraController _cameraController;
   PlatformFile? file;
@@ -30,14 +31,12 @@ class _UploadPicState extends State<UploadPic> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _cameraController = CameraController(widget.camera, ResolutionPreset.high);
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _cameraController.dispose();
     super.dispose();
   }
@@ -59,7 +58,7 @@ class _UploadPicState extends State<UploadPic> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (_imagePath != null || imageFile != null)
-                  Icon(Icons.check_circle, color: Colors.green),
+                  const Icon(Icons.check_circle, color: Colors.green),
                 if (_imagePath != null || imageFile != null)
                   const SizedBox(width: 8),
                 Text(
@@ -67,12 +66,12 @@ class _UploadPicState extends State<UploadPic> {
                       ? 'Upload Your Clothing Item'
                       : 'Picture Uploaded\nSuccessfully',
                   textAlign: TextAlign.center,
-                  style: AppStyles.black24bold_poppins,
+                  style: AppStyles.black24BoldPoppins,
                   softWrap: true,
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             _imagePath == null && imageFile == null
                 ? Container(
                     alignment: Alignment.center,
@@ -85,14 +84,14 @@ class _UploadPicState extends State<UploadPic> {
                       spacing: 20,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        ImageIcon(
+                        const ImageIcon(
                           AssetImage(AppImages.uploadIcon),
                           color: AppColors.primary,
                           size: 98,
                         ),
                         Text(
                           'Upload Picture',
-                          style: AppStyles.primary24bold_tiroTamil,
+                          style: AppStyles.primary24BoldTiroTamil,
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -123,30 +122,31 @@ class _UploadPicState extends State<UploadPic> {
                           ChosenPicture.clear();
                           setState(() {});
                         },
-                        icon: Icon(Icons.cancel, color: Colors.red, size: 30),
+                        icon: const Icon(Icons.cancel,
+                            color: Colors.red, size: 30),
                       ),
                     ],
                   ),
-            SizedBox(height: 38),
+            const SizedBox(height: 38),
             // upload from gallery
             Visibility(
               visible: _imagePath == null && imageFile == null,
               child: CustomElevatedButton(
                 text: 'Upload from gallery',
-                textStyle: AppStyles.white20bold_poppins,
+                textStyle: AppStyles.white20BoldPoppins,
                 iconColor: AppColors.white,
                 backgroundColor: AppColors.primary,
                 onPressed: _pickFile,
                 icon: AppImages.fileIcon,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             // open camera to take a photo
             Visibility(
               visible: _imagePath == null && imageFile == null,
               child: CustomElevatedButton(
                 text: 'Take a photo',
-                textStyle: AppStyles.primary20bold_poppins,
+                textStyle: AppStyles.primary20BoldPoppins,
                 iconColor: AppColors.primary,
                 backgroundColor: Colors.transparent,
                 onPressed: openCam,
@@ -158,7 +158,7 @@ class _UploadPicState extends State<UploadPic> {
               visible: _imagePath != null || imageFile != null,
               child: CustomElevatedButton(
                 text: 'Submit',
-                textStyle: AppStyles.white20bold_poppins,
+                textStyle: AppStyles.white20BoldPoppins,
                 iconColor: AppColors.white,
                 backgroundColor: AppColors.primary,
                 onPressed: submit,
@@ -169,6 +169,7 @@ class _UploadPicState extends State<UploadPic> {
       ),
     );
   }
+
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       // type: FileType.image,
@@ -181,6 +182,7 @@ class _UploadPicState extends State<UploadPic> {
       setState(() {});
     }
   }
+
   Future<void> openCam() async {
     final cameras = await availableCameras();
 
@@ -199,12 +201,13 @@ class _UploadPicState extends State<UploadPic> {
       });
     }
   }
+
   Future<void> submit() async {
     final scaffold = ScaffoldMessenger.of(context);
 
     try {
       scaffold.showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Row(
             children: [
               CircularProgressIndicator(color: AppColors.primary),
@@ -216,7 +219,8 @@ class _UploadPicState extends State<UploadPic> {
       );
       // Process image
       final Float32List processedPic =
-          await ImagePreprocessing.processImageForModel(imageFile ?? File(_imagePath!.path));
+          await ImagePreprocessing.processImageForModel(
+              imageFile ?? File(_imagePath!.path));
       // predict
       final handler = ModelHandler();
       await handler.loadModel();
@@ -233,11 +237,12 @@ class _UploadPicState extends State<UploadPic> {
       );
     }
   }
+
   void _showResultsDialog(List<Map<String, dynamic>> predictions) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Classification Results'),
+        title: const Text('Classification Results'),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -250,13 +255,13 @@ class _UploadPicState extends State<UploadPic> {
                   backgroundColor: index == 0 ? Colors.green : Colors.grey,
                   child: Text(
                     '${index + 1}',
-                    style: TextStyle(color: AppColors.white),
+                    style: const TextStyle(color: AppColors.white),
                   ),
                 ),
                 title: Text(pred['label']),
                 trailing: Text(
                   pred['percentage'],
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               );
             },
@@ -265,7 +270,7 @@ class _UploadPicState extends State<UploadPic> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),

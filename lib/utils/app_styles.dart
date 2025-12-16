@@ -4,29 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppStyles {
   // primary
-  static final TextStyle primary20bold_poppins= GoogleFonts.poppins(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-      color: AppColors.primary
-  );
-  static final TextStyle primary24bold_tiroTamil= GoogleFonts.tiroTamil(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-      color: AppColors.primary
-  );
+  static final TextStyle primary20BoldPoppins = GoogleFonts.poppins(
+      fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary);
+  static final TextStyle primary24BoldTiroTamil = GoogleFonts.tiroTamil(
+      fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary);
   // black
-  static final TextStyle black24bold_poppins= GoogleFonts.poppins(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: AppColors.black
-  );
+  static final TextStyle black24BoldPoppins = GoogleFonts.poppins(
+      fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.black);
   // white
-  static final TextStyle white20bold_poppins= GoogleFonts.poppins(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-      color: AppColors.white
-  );
-
-
-
+  static final TextStyle white20BoldPoppins = GoogleFonts.poppins(
+      fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.white);
 }
