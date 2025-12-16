@@ -22,7 +22,6 @@ class UploadPic extends StatefulWidget {
   @override
   State<UploadPic> createState() => _UploadPicState();
 }
-
 class _UploadPicState extends State<UploadPic> {
   late CameraController _cameraController;
   PlatformFile? file;
@@ -215,13 +214,13 @@ class _UploadPicState extends State<UploadPic> {
           ),
         ),
       );
-      // Process image and get Float32List tensor directly
-      final Float32List processedTensor =
+      // Process image
+      final Float32List processedPic =
           await ImagePreprocessing.processImageForModel(imageFile ?? File(_imagePath!.path));
       // predict
       final handler = ModelHandler();
       await handler.loadModel();
-      final predictions = await handler.predict(processedTensor);
+      final predictions = await handler.predict(processedPic);
 
       scaffold.hideCurrentSnackBar();
 

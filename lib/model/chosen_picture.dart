@@ -6,14 +6,13 @@ class ChosenPicture {
   static img.Image? originalImage;
   static img.Image? grayScaleImage;
   static img.Image? resizedImage;
-  static Float32List? processedTensor;
-  static List<List<double>>? finalResult; // Keep for compatibility
-
+  static Float32List? processedPic;
+  static List<List<double>>? finalResult;
   static void clear() {
     originalImage = null;
     grayScaleImage = null;
     resizedImage = null;
-    processedTensor = null;
+    processedPic = null;
     finalResult = null;
   }
 }
