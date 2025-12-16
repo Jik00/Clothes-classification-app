@@ -11,7 +11,7 @@ class ImagePreprocessing {
       ChosenPicture.clear();
       // Execute the complete preprocessing pipeline
       await _executePreprocessingPipeline(imageFile);
-      return ChosenPicture.processedTensor!;
+      return ChosenPicture.processedPic!;
 
     } catch (e) {
       ChosenPicture.clear();
@@ -108,7 +108,7 @@ class ImagePreprocessing {
   }
   // Step 8: Store final results in ChosenPicture
   static void _storeFinalResults(Float32List pixels) {
-    ChosenPicture.processedTensor = pixels;
+    ChosenPicture.processedPic = pixels;
 
     // Also store as 2D array for compatibility
     ChosenPicture.finalResult = List.generate(28, (_) => List<double>.filled(28, 0.0));
